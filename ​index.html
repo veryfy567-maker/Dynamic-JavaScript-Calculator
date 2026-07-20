@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Tech Calculator & Game</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0a0a12; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; color: #fff; }
+        
+        /* Calculator Styling */
+        .calc-container { background: #121225; border: 2px solid #00ffcc; padding: 25px; border-radius: 20px; box-shadow: 0 0 25px rgba(0, 255, 204, 0.3); width: 340px; transition: all 0.5s ease; position: relative; }
+        .screen { background: #070714; border: 1px solid #333; width: 100%; height: 70px; border-radius: 10px; margin-bottom: 20px; padding: 15px; text-align: right; font-size: 28px; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.5); overflow: hidden; font-weight: bold; }
+        .hint { font-size: 11px; color: #ff0055; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        button { background: #1a1a3a; border: 1px solid #00ffcc; color: #fff; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 0 #009977; }
+        button:active { transform: translateY(3px); box-shadow: none; }
+        button.op { background: #ff0055; border-color: #ff0055; box-shadow: 0 3px 0 #990033; }
+        button.eq { background: #00ffcc; color: #0a0a12; box-shadow: 0 3px 0 #00b38f; grid-column: span 2; }
+        
+        /* Hidden Game Styling */
+        .game-container { display: none; background: #111; border: 3px solid #ff0055; border-radius: 15px; box-shadow: 0 0 30px rgba(255, 0, 85, 0.4); text-align: center; position: relative; padding: 10px; }
+        canvas { background: #222; border-radius: 10px; display: block; margin: 0 auto; border: 2px solid #333; }
+        .score-board { font-size: 20px; font-weight: bold; color: #ff0055; margin: 10px 0; text-shadow: 0 0 5px rgba(255,0,85,0.5); }
+        .controls { display: flex; justify-content: space-around; margin-top: 15px; }
+        .btn-ctrl { background: #ff0055; color: white; border: none; padding: 15px 35px; font-size: 20px; border-radius: 10px; box-shadow: 0 4px 0 #990033; }
+        .btn-ctrl:active { transform: translateY(4px); box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <!-- CALCULATOR INTERFACE -->
+    <div class="calc-container" id="calculator">
+        <div class="hint">🔒 Type code '334' & press '=' to Unlock Race Game</div>
+        <div class="screen" id="display">0</div>
+        <div class="buttons">
+            <button onclick="clearScreen()" class="op">C</button>
+            <button onclick="press('/')" class="op">/</button>
+            <button onclick="press('*')" class="op">*</button>
+            <button onclick="press('-')" class="op">-</button>
+            <button onclick="press('7')">7</button>
+            <button onclick="press('8')">8</button>
+            <button onclick="press('9')">9</button>
+            <button onclick="press('+')" class="op">+</button>
+            <button onclick="press('4')">4</button>
+            <button onclick="press('5')">5</button>
+            <button onclick="press('6')">6</button>
+            <button onclick="press('1')">1</button>
+            <button onclick="press('2')">2</button>
+            <button onclick="press('3')">3</button>
+            <button onclick="press('0')">0</button>
+            <button onclick="calculate()" class="eq">=</button>
+        </div>
+    </div>
+
+    <!-- CAR RACING GAME INTERFACE -->
+    <div class="game-container" id="gameMode">
+        <div class="score-board">SCORE: <span id="score">0</span></div>
+        <canvas id="gameCanvas" width="300" height="450"></canvas>
+        <div class="controls">
+            <button class="btn-ctrl" id="moveLeft">◀ LEFT</button>
+            <button class="btn-ctrl" id="moveRight">RIGHT ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Calculator Logic ---
+        let display = document.getElementById('display');
+        function press(val) {
+            if(display.innerText === '0') display.innerText = val;
+            else display.innerText += val;
+            playTone(440, 0.05); // High-tech click sound
+        }
+        function clearScreen() {
+            display.innerText = '0';
+            playTone(300, 0.08);
+        }
+        function calculate() {
+            let input = display.innerText;
+            
+            // SECRET EASTER EGG CODE: "334" UNLOCKS THE GAME!
+            if (input === '334') {
+                playTone(600, 0.2);
+                setTimeout(() => playTone(800, 0.3), 150);
+                document.getElementById('calculator').style.display = 'none';
+                document.getElementById('gameMode').style.display = 'block';
+                startGame();
+                return;
+            }
+            
+            try {
+                display.innerText = eval(input);
+                playTone(520, 0.1);
+            } catch {
+                display.innerText = 'ERROR';
+                playTone(150, 0.2);
+            }
+        }
+
+        // --- Audio Effect (Beep) ---
+        function playTone(freq, duration) {
+            let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let oscillator = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = freq;
+            oscillator.type = 'sine';
+            oscillator.start();
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        // --- Car Racing Game Logic ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gameInterval;
+        let score = 0;
+        let gameOver = false;
+
+        // Player Car
+        let player = { x: 130, y: 380, w: 40, h: 60, speed: 15 };
+        // Enemy Cars (Obstacles)
+        let enemies = [];
+        let enemySpeed = 4;
+
+        function startGame() {
+            enemies = [];
+            score = 0;
+            gameOver = false;
+            document.getElementById('score').innerText = score;
+            gameInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+            spawnEnemy();
+        }
+
+        function spawnEnemy() {
+            if (gameOver) return;
+            let lanes = [40, 130, 220];
+            let randomLane = lanes[Math.floor(Math.random() * lanes.length)];
+            enemies.push({ x: randomLane, y: -60, w: 40, h: 60 });
+            setTimeout(spawnEnemy, 1500 - Math.min(score * 10, 800)); // Spawns faster as score goes up
+        }
+
+        function updateGame() {
+            if (gameOver) return;
+            
+            // Clear Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Road Lines (Movement effect)
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            ctx.moveTo(100, 0); ctx.lineTo(100, canvas.height);
+            ctx.moveTo(200, 0); ctx.lineTo(200, canvas.height);
+            ctx.stroke();
+
+            // Draw Player Car (Neon Cyan Blue)
+            ctx.fillStyle = '#00ffcc';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00ffcc';
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            // Draw & Update Enemy Cars (Neon Pink/Red)
+            ctx.fillStyle = '#ff0055';
+            ctx.shadowColor = '#ff0055';
+            enemies.forEach((enemy, index) => {
+                enemy.y += enemySpeed + (score * 0.1); // Accelerates
+                ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
+
+                // Collision Detection
+                if (player.x < enemy.x + enemy.w && player.x + player.w > enemy.x &&
+                    player.y < enemy.y + enemy.h && player.y + player.h > enemy.y) {
+                    endGame();
+                }
+
+                // Check if enemy passed (Score Point)
+                if (enemy.y > canvas.height) {
+                    enemies.splice(index, 1);
+                    score++;
+                    document.getElementById('score').innerText = score;
+                    playTone(800, 0.05);
+                }
+            });
+            ctx.shadowBlur = 0; // Reset shadow
+        }
+
+        function endGame() {
+            gameOver = true;
+            clearInterval(gameInterval);
+            playTone(100, 0.5); // Explosion Sound
+            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff0055';
+            ctx.font = '24px Arial';
+            ctx.fillText('GAME OVER', 80, 200);
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Arial';
+            ctx.fillText('Tap Left/Right to Restart', 65, 240);
+        }
+
+        // Controls
+        function moveLeft() {
+            if (gameOver) { startGame(); return; }
+            if (player.x > 40) player.x -= 90; // Switch lane left
+            playTone(400, 0.03);
+        }
+        function moveRight() {
+            if (gameOver) { startGame(); return; }
+            if (player.x < 220) player.x += 90; // Switch lane right
+            playTone(400, 0.03);
+        }
+
+        document.getElementById('moveLeft').addEventListener('click', moveLeft);
+        document.getElementById('moveRight').addEventListener('click', moveRight);
+
+        // Keyboard support for testing on PC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') moveLeft();
+            if (e.key === 'ArrowRight') moveRight();
+        });
+    </script>
+</body>
+</html>
